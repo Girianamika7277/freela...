@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client IP and Location</title>
+</head>
+<body>
+
+<script>
+  
+  function getClientIP() {
+    return new Promise((resolve, reject) => {
+      const ipRequest = new XMLHttpRequest();
+      ipRequest.open('GET', 'https://api64.ipify.org?format=json');
+      ipRequest.onload = function() {
+        if (ipRequest.status === 200) {
+          const data = JSON.parse(ipRequest.responseText);
+          resolve(data.ip);
+        } else {
+          reject('Failed to fetch IP address');
+        }
+      };
+      ipRequest.onerror = function() {
+        reject('Error while fetching IP address');
+      };
+      ipRequest.send();
+    });
+  }
+
+  
+  function getLocationByIP(ip) {
+    return new Promise((resolve, reject) => {
+      const locationRequest = new XMLHttpRequest();
+      locationRequest.open('GET', `https://ipapi.co/${ip}/json/`);
+      locationRequest.onload = function() {
+        if (locationRequest.status === 200) {
+          const data = JSON.parse(locationRequest.responseText);
+          resolve(data);
+        } else {
+          reject('Failed to fetch location');
+        }
+      };
+      locationRequest.onerror = function() {
+        reject('Error while fetching location');
+      };
+      locationRequest.send();
+    });
+  }
+
+
+
+  async function displayIPAndLocation() {
+    try {
+      const clientIP = await getClientIP();
+      const locationData = await getLocationByIP(clientIP);
+
+      console.log('Client IP:', clientIP);
+      console.log('Location:', locationData);
+
+      const resultElement = document.createElement('div');
+      resultElement.innerHTML = `
+        <p>Client IP: ${clientIP}</p>
+        <p>Location: ${locationData.city}, ${locationData.region}, ${locationData.country_name}</p>
+      `;
+      document.body.appendChild(resultElement);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // Call the main function to display IP and location
+  displayIPAndLocation();
+</script>
+
+</body>
+</html>
